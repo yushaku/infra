@@ -3,15 +3,15 @@ version: "3.3"
 services:
   redis:
     image: redis:7.0-alpine
-    container_name: lumyri-redis
+    container_name: yushaku-redis
     ports:
       - 6379:6379
     networks:
-      - lumyri-network
+      - yu-network
 
   minio:
     image: bitnami/minio:2022.9.25
-    container_name: lumyri-minio
+    container_name: yushaku-minio
     restart: unless-stopped
     ports:
       - ${MINIO_PORT_ADMIN}:9001
@@ -22,19 +22,34 @@ services:
     volumes:
       - ./minio:/data
     networks:
-      - lumyri-network
+      - yu-network
 
   nats:
     image: nats:2.9-alpine
-    container_name: lumyri-nats
+    container_name: yushaku-nats
     restart: unless-stopped
     ports:
       - 8222:8222
       - 4222:4222
     networks:
-      - lumyri-network
+      - yu-network
+
+  postgres:
+    image: postgres:14.4-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB_MAIN: ${DB_MAIN}
+      POSTGRES_DB_TEST: ${DB_TEST}
+    ports:
+      - ${DB_PORT}:5432
+    volumes:
+      - ./.docker/postgres/data:/var/lib/postgresql/data
+      - ./.docker/postgres/entrypoint:/docker-entrypoint-initdb.d
+    networks:
+      - yu-network
 
 networks:
-  lumyri-network:
+  yu-network:
     driver: bridge
-    name: lumyri-network
+    name: yu-network
