@@ -1,0 +1,40 @@
+version: "3.3"
+
+services:
+  redis:
+    image: redis:7.0-alpine
+    container_name: lumyri-redis
+    ports:
+      - 6379:6379
+    networks:
+      - lumyri-network
+
+  minio:
+    image: bitnami/minio:2022.9.25
+    container_name: lumyri-minio
+    restart: unless-stopped
+    ports:
+      - ${MINIO_PORT_ADMIN}:9001
+      - ${MINIO_PORT_API}:9000
+    environment:
+      MINIO_ROOT_USER: ${MINIO_SERVER_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SERVER_SECRET_KEY}
+    volumes:
+      - ./minio:/data
+    networks:
+      - lumyri-network
+
+  nats:
+    image: nats:2.9-alpine
+    container_name: lumyri-nats
+    restart: unless-stopped
+    ports:
+      - 8222:8222
+      - 4222:4222
+    networks:
+      - lumyri-network
+
+networks:
+  lumyri-network:
+    driver: bridge
+    name: lumyri-network
