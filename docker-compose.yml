@@ -3,15 +3,26 @@ version: "3.3"
 services:
   redis:
     image: redis:7.0-alpine
-    container_name: yushaku-redis
+    container_name: redis
     ports:
-      - 6379:6379
+      - ${REDIS_PORT:-6379}:6379
     networks:
-      - yu-network
+      - common
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=redis
+    ports:
+      - ${REDIS_COMMAND_PORT:-8081}:8081
+    networks:
+      - common
 
   minio:
     image: bitnami/minio:2022.9.25
-    container_name: yushaku-minio
+    container_name: minio
     restart: unless-stopped
     ports:
       - ${MINIO_PORT_ADMIN}:9001
@@ -20,22 +31,23 @@ services:
       MINIO_ROOT_USER: ${MINIO_SERVER_ACCESS_KEY}
       MINIO_ROOT_PASSWORD: ${MINIO_SERVER_SECRET_KEY}
     volumes:
-      - ./minio:/data
+      - ./.docker/minio:/data
     networks:
-      - yu-network
+      - common
 
   nats:
     image: nats:2.9-alpine
-    container_name: yushaku-nats
+    container_name: nats
     restart: unless-stopped
     ports:
       - 8222:8222
       - 4222:4222
     networks:
-      - yu-network
+      - common
 
   postgres:
     image: postgres:14.4-alpine
+    container_name: postgres
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASS}
@@ -45,11 +57,23 @@ services:
       - ${DB_PORT}:5432
     volumes:
       - ./.docker/postgres/data:/var/lib/postgresql/data
-      - ./.docker/postgres/entrypoint:/docker-entrypoint-initdb.d
     networks:
-      - yu-network
+      - common
+
+  mongodb:
+    container_name: mongo_db
+    image: mongo:6.0.2-focal
+    ports:
+      - ${MONGO_PORT}:${MONGO_PORT}
+    volumes:
+      - .docker/mongodb:/data/db
+    environment:
+      - MONGO_NAME=$MONGO_NAME
+    networks:
+      - common
+
 
 networks:
-  yu-network:
+  common:
     driver: bridge
-    name: yu-network
+    name: common
