@@ -5,7 +5,7 @@ services:
     image: redis:7.0-alpine
     container_name: redis
     ports:
-      - ${REDIS_PORT:-6379}:6379
+      - ${redis_port:-6379}:6379
     networks:
       - common
 
@@ -73,6 +73,54 @@ services:
       - MONGO_NAME=$MONGO_NAME
     networks:
       - common
+
+  influxdb:
+    image: influxdb:1.8
+    container_name: influxdb
+    networks:
+      - common
+    ports:
+      - ${INFLUXDB_PORT}:8086
+    environment:
+      - INFLUXDB_DB=${INFLUXDB_DB}
+
+  k6:
+    image: grafana/k6:latest
+    container_name: 'k6'
+    networks:
+      - common
+    ports:
+      - ${K6_PORT}:6565
+    environment:
+      - K6_OUT=influxdb=http://influxdb:${INFLUXDB_PORT}/k6
+    volumes:
+      - ./samples:/scripts
+
+  grafana:
+    image: grafana/grafana:9.3.8
+    container_name: grafana
+    networks:
+      - common
+    ports:
+      - ${GRAFANA_PORT}:3000
+    environment:
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_BASIC_ENABLED=false
+    volumes:
+      - ./.docker/grafana:/etc/grafana/provisioning/
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - /etc/prometheus:/etc/prometheus
+      - ./.docker/prometheus:/prometheus
+    restart: unless-stopped
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
 
 networks:
   common:
