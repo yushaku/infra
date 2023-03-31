@@ -103,12 +103,12 @@ services:
       - ./.docker/influxdb:/var/lib/influxdb
   
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.33.1
     container_name: prometheus
     ports:
       - ${PROMETHEUS_PORT:-9090}:9090
-    # volumes:
-    #   - ./.docker/prometheus:/prometheus
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
     restart: unless-stopped
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
