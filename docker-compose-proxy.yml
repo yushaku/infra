@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:1.20
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./config/nginx/nginx_log:/var/log/nginx
+      - ./config/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - common
+
+  nats:
+    image: nats:2.9-alpine
+    container_name: nats
+    restart: unless-stopped
+    ports:
+      - 8222:8222
+      - 4222:4222
+    networks:
+      - common
+
+networks:
+  common:
+    external: true
