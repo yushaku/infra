@@ -3,6 +3,7 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: 'doodle-server'
+  - job_name: "doodle-server"
+    metrics_path: /metrics
     static_configs:
-      - targets: ['localhost:8005']
+      - targets: ["10.0.4.33:8005"]
