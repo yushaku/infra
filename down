@@ -1,8 +1,0 @@
-#!/bin/bash
-
-function down_monitor() {
-	docker-compose stop grafana influxdb prometheus
-	docker-compose rm grafana influxdb prometheus -y
-}
-
-[ "$1" == "monitor" ] && down_monitor
