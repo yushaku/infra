@@ -1,5 +1,3 @@
-#! /bin/sh
+CREATE DATABASE ${DB_MAIN};
 
-psql -v --username "${POSTGRES_USER}" -c "CREATE DATABASE ${POSTGRES_DB_MAIN};"
-psql -v --username "${POSTGRES_USER}" -c "CREATE DATABASE ${POSTGRES_DB_TEST};"
-
+CREATE DATABASE ${DB_TEST};
