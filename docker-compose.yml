@@ -22,14 +22,26 @@ services:
     networks:
       - common
 
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: redis-commander
-    restart: unless-stopped
+  # redis-commander:
+  #   image: rediscommander/redis-commander:latest
+  #   container_name: redis-commander
+  #   restart: unless-stopped
+  #   environment:
+  #     - REDIS_HOSTS=redis
+  #   ports:
+  #     - ${REDIS_COMMAND_PORT:-8081}:8081
+  #   networks:
+  #     - common
+
+  redis-insight:
+    container_name: redis-ui
+    image: redis/redisinsight:2.52.0-amd64
+    ports:
+      - "5540:5540"
     environment:
       - REDIS_HOSTS=redis
-    ports:
-      - ${REDIS_COMMAND_PORT:-8081}:8081
+    volumes:
+      - .docker/redis-insight:/data
     networks:
       - common
 
